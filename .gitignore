@@ -1,0 +1,5 @@
+# Données en clair et sorties : jamais versionnées
+src/data/
+build/
+src/node_modules/
+__pycache__/

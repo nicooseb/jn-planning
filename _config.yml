@@ -1,0 +1,4 @@
+# GitHub Pages : ne publier que la page chiffrée (index.html), pas les sources
+exclude:
+  - src
+  - README.md

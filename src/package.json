@@ -1,0 +1,10 @@
+{
+  "name": "jn-planning-fonts",
+  "private": true,
+  "description": "Polices de la charte J&N, utilisées en local pour générer le PDF",
+  "dependencies": {
+    "@fontsource/cormorant-garamond": "5.1.0",
+    "@fontsource/jost": "5.1.1",
+    "@fontsource/pinyon-script": "5.1.0"
+  }
+}

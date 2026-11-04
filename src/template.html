@@ -1,0 +1,233 @@
+<title>Planning du samedi · J&amp;N</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap">
+<style>
+/*FONTS*/
+/* Mise en page : feuille de papeterie (charte du faire-part) — en-tête logo + titre, puis une grille horaires × personnes, imprimable en A3 paysage. Un seul thème clair, comme le papier. */
+:root {
+  --paper: #FFFFFF;
+  --ink: #14197A;          /* encre bleu nuit du faire-part */
+  --ink-soft: #4F5488;
+  --ink-tint: #ECEDF7;
+  --magenta: #DF1C76;      /* magenta signature */
+  --magenta-tint: #FCE9F2;
+  --rule: #DCDDEA;
+  --rule-strong: #B9BBD3;
+  --display: 'Cormorant Garamond', 'Cormorant', Garamond, 'Times New Roman', serif;
+  --body: 'Jost', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+  --script: 'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
+  --tcol: 64px;
+  --col: minmax(140px, 1fr);
+  --r30: 26px; --r15: 40px; --r60: 32px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-family: var(--body); font-size: 14px; }
+.page {
+  padding-block: 24px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ---------- En-tête ---------- */
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 28px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.logo { width: 76px; height: auto; flex: none; }
+.titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kicker { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+h1 { font-family: var(--display); font-weight: 500; font-size: clamp(28px, 4vw, 40px); line-height: 1.02; margin: 0; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--magenta); }
+.names { font-family: var(--script); color: var(--magenta); font-size: 30px; line-height: 1; }
+.meta { margin-left: auto; display: flex; flex-direction: column; gap: 8px; max-width: 560px; min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.sw { width: 22px; height: 12px; border-radius: 2px; flex: none; }
+.sw.k-fort { background: var(--magenta); }
+.sw.k-ok { background: var(--ink-tint); }
+.sw.k-ind { border: 1px solid var(--ink); background: var(--paper); }
+.sw.k-cal { border: 1px dashed var(--ink-soft); background: var(--paper); }
+.sw.k-slot { border: 1.4px solid var(--magenta); background: var(--magenta-tint); }
+.note { font-size: 11.5px; line-height: 1.45; color: var(--ink-soft); margin: 0; }
+.hint { font-size: 12px; color: var(--ink-soft); margin: 0; }
+
+/* ---------- Grille ---------- */
+.scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--ink); }
+.grid {
+  display: grid;
+  grid-template-columns: var(--tcol) repeat(__NCOLS__, var(--col));
+  grid-template-rows: __ROWS__;
+  min-width: calc(64px + __NCOLS__ * 140px);
+  position: relative;
+}
+.gh { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--magenta); font-weight: 500;
+      padding: 6px 8px 5px; border-bottom: 1px solid var(--magenta); text-align: center; align-self: end; }
+.gh + .gh { border-left: 6px solid var(--paper); }
+.gh-time { display: flex; align-items: flex-end; border-bottom: 1px solid var(--ink); color: var(--ink-soft); padding-left: 0; text-align: left;
+           position: sticky; left: 0; z-index: 4; background: var(--paper); }
+.ch { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
+      padding: 8px 8px 7px; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--rule); min-width: 0; }
+.ch:hover { background: var(--ink-tint); }
+.ch:focus-visible { outline: 2px solid var(--magenta); outline-offset: -2px; }
+.ch[aria-pressed="true"] { background: var(--magenta); color: var(--paper); }
+.ch[aria-pressed="true"] .ch-role { color: var(--paper); }
+.ch-name { font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.05; text-wrap: balance; }
+.ch-role { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); line-height: 1.25; }
+
+.t { grid-column: 1; position: sticky; left: 0; z-index: 3; background: var(--paper);
+     font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--ink-soft);
+     border-top: 1px solid var(--rule); padding: 2px 8px 0 0; display: flex; align-items: flex-start; }
+.t-hour { color: var(--ink); font-weight: 600; border-top-color: var(--rule-strong); }
+.t-30 span::after { content: ""; }
+.cell { border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.cell-hour { border-top-color: var(--rule-strong); }
+.cell-30 { background: #FBFBFE; }
+.t-end { border-top: 1px solid var(--ink); }
+
+/* Blocs */
+.blk { margin: 2px 3px; padding: 4px 7px; border-radius: 3px; z-index: 2; min-width: 0; overflow: hidden;
+       display: flex; flex-direction: column; gap: 2px; line-height: 1.25; }
+.bt { font-weight: 500; font-size: 12.5px; }
+.bd { font-size: 11.5px; }
+.h1 { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 8px; padding-block: 2px; }
+.k-fort { background: var(--magenta); color: var(--paper); }
+.k-fort .bt { font-family: var(--display); font-weight: 600; font-size: 16px; }
+.k-ok { background: var(--ink-tint); color: var(--ink); }
+.k-ind { background: var(--paper); border: 1px solid var(--ink); color: var(--ink); }
+.k-cal { background: var(--paper); border: 1px dashed var(--ink-soft); color: var(--ink-soft); font-style: italic; }
+.k-cal .bt { font-style: normal; color: var(--ink); }
+.k-slot { background: var(--magenta-tint); border: 1.5px solid var(--magenta); color: var(--magenta); }
+.k-slot .bt { font-weight: 600; }
+.blk-final { background: var(--ink); color: var(--paper); justify-content: center; }
+.blk-final .bt { font-weight: 400; font-size: 12px; }
+
+/* Focus sur une colonne */
+.grid.focusing .blk:not(.on), .grid.focusing .cell:not(.on) { opacity: .22; }
+.grid.focusing .blk.blk-final { opacity: 1; }
+.blk, .cell { transition: opacity .15s ease; }
+@media (prefers-reduced-motion: reduce) { .blk, .cell { transition: none; } }
+
+/* ---------- À trancher ---------- */
+.todo { display: grid; grid-template-columns: auto 1fr; gap: 10px 22px; align-items: start; }
+.todo h2 { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 0; color: var(--magenta); line-height: 1; }
+.todo ul { list-style: none; margin: 0; padding: 0; columns: 2 320px; column-gap: 28px; font-size: 12.5px; line-height: 1.45; }
+.todo li { break-inside: avoid; padding: 0 0 6px; }
+.todo b { font-weight: 600; color: var(--ink); margin-right: 4px; }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; font-size: 11px; color: var(--ink-soft); }
+.foot .site { color: var(--magenta); }
+
+@media (max-width: 640px) {
+  .meta { margin-left: 0; }
+  .todo { grid-template-columns: 1fr; }
+  .logo { width: 58px; }
+}
+
+/* ---------- Impression A3 paysage ---------- */
+@page { size: A3 landscape; margin: 7mm 7mm 6mm; }
+@media print {
+  :root { --tcol: 12mm; --col: minmax(0, 1fr); --r30: 3.7mm; --r15: 4.1mm; --r60: 4.9mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-size: 7pt; }
+  .page { padding: 0; gap: 1.6mm; }
+  .hint { display: none; }
+  .head { padding-block: 1.6mm; gap: 3mm 8mm; flex-wrap: nowrap; }
+  .logo { width: 17mm; }
+  .brand { gap: 4mm; }
+  .kicker { font-size: 6.5pt; }
+  h1 { font-size: 22pt; }
+  .names { font-size: 17pt; }
+  .meta { max-width: 150mm; gap: 1.4mm; }
+  .legend { font-size: 6.8pt; gap: 1mm 4mm; }
+  .sw { width: 6mm; height: 3mm; }
+  .note { font-size: 6.4pt; line-height: 1.35; }
+  .scroller { overflow: visible; }
+  .grid { min-width: 0; width: 100%; }
+  .gh { font-size: 6.3pt; padding: 0.8mm 1mm; }
+  .gh + .gh { border-left-width: 2mm; }
+  .ch { padding: 1mm 1.4mm 0.9mm; }
+  .ch-name { font-size: 10pt; }
+  .ch-role { font-size: 5.3pt; }
+  .t { font-size: 6.2pt; padding: 0.3mm 1.6mm 0 0; }
+  .blk { margin: 0.35mm 0.5mm; padding: 0.45mm 1.2mm; border-radius: 0.8mm; gap: 0.2mm; line-height: 1.16; }
+  .h1 { padding-block: 0.2mm; column-gap: 1.6mm; }
+  .bt { font-size: 6.6pt; }
+  .bd { font-size: 5.9pt; }
+  .k-fort .bt { font-size: 8.4pt; }
+  .k-ind, .k-cal { border-width: 0.25mm; }
+  .k-slot { border-width: 0.35mm; }
+  .blk-final .bt { font-size: 6.6pt; }
+  .todo { gap: 1mm 5mm; }
+  .todo h2 { font-size: 11pt; }
+  .todo ul { columns: 4; column-gap: 5mm; font-size: 6.2pt; line-height: 1.3; }
+  .todo li { padding-bottom: 0.6mm; }
+  .foot { font-size: 6pt; }
+  .grid.focusing .blk, .grid.focusing .cell { opacity: 1 !important; }
+  .ch[aria-pressed="true"] { background: none; color: var(--ink); }
+}
+</style>
+<!--BODY-->
+<main class="page">
+  <header class="head">
+    <div class="brand">
+      <!--LOGO-->
+      <div class="titles">
+        <span class="kicker">Planning partagé · Château de Saulon</span>
+        <h1>Samedi <em>26 juin 2027</em></h1>
+        <span class="names">Jeanne &amp; Nicolas</span>
+      </div>
+    </div>
+    <div class="meta">
+      <ul class="legend">
+        <li><span class="sw k-fort"></span>Temps fort</li>
+        <li><span class="sw k-ok"></span>Confirmé</li>
+        <li><span class="sw k-ind"></span>Horaire indicatif</li>
+        <li><span class="sw k-cal"></span>À caler · à décider</li>
+        <li><span class="sw k-slot"></span>Créneau libre 15′</li>
+      </ul>
+      <p class="note"><!--NOTE--></p>
+    </div>
+  </header>
+
+  <p class="hint">Sélectionnez un nom pour ne voir que sa colonne.</p>
+
+  <div class="scroller">
+    <div class="grid" id="grid">
+<!--GRID-->
+    </div>
+  </div>
+
+  <section class="todo" aria-labelledby="todo-t">
+    <h2 id="todo-t">À trancher</h2>
+    <ul>
+<!--TODO-->
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <span><!--FOOTER--></span>
+    <span class="site">jeanne-ni.co</span>
+  </footer>
+</main>
+<script>
+(function () {
+  var grid = document.getElementById('grid');
+  if (!grid) return;
+  var current = null;
+  grid.querySelectorAll('.ch').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var col = btn.getAttribute('data-col');
+      var same = current === col;
+      current = same ? null : col;
+      grid.querySelectorAll('.ch').forEach(function (b) { b.setAttribute('aria-pressed', String(!same && b === btn)); });
+      grid.classList.toggle('focusing', !same);
+      grid.querySelectorAll('.blk, .cell').forEach(function (el) {
+        var cols = (el.getAttribute('data-cols') || el.getAttribute('data-col') || '').split(' ');
+        el.classList.toggle('on', !same && cols.indexOf(col) !== -1);
+      });
+    });
+  });
+})();
+</script>
