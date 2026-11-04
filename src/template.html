@@ -21,8 +21,12 @@
   --tcol: 64px;
   --col: minmax(140px, 1fr);
   --r30: 26px; --r15: 40px; --r60: 32px;
+  --microw: 190px;          /* colonne « Au micro » pendant le zoom */
+  --mpx: 16px;              /* hauteur d'une minute pendant le zoom */
+  --lead: 76px;             /* ligne d’amorce du zoom */
   color-scheme: light;
 }
+@property --z { syntax: '<number>'; inherits: true; initial-value: 0; }
 * { box-sizing: border-box; }
 html, body { background: var(--paper); color: var(--ink); }
 body { font-family: var(--body); font-size: 14px; }
@@ -58,11 +62,16 @@ h1 em { font-style: normal; color: var(--magenta); }
 .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--ink); }
 .grid {
   display: grid;
-  grid-template-columns: var(--tcol) repeat(__NCOLS__, var(--col));
+  --z: 0;
+  --rlead: calc(var(--r15) + var(--z) * (var(--lead) - var(--r15)));
+  --rcer: calc(var(--r15) + var(--z) * (15 * var(--mpx) - var(--r15)));
+  grid-template-columns: var(--tcol) calc(var(--z) * var(--microw)) repeat(__NCOLS__, var(--col));
   grid-template-rows: __ROWS__;
-  min-width: calc(64px + __NCOLS__ * 140px);
+  min-width: calc(64px + var(--z) * var(--microw) + __NCOLS__ * 140px);
   position: relative;
+  transition: --z .5s cubic-bezier(.22, .7, .2, 1);
 }
+.grid.zoomed { --z: 1; }
 .gh { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--magenta); font-weight: 500;
       padding: 6px 8px 5px; border-bottom: 1px solid var(--magenta); text-align: center; align-self: end; }
 .gh + .gh { border-left: 6px solid var(--paper); }
@@ -104,8 +113,64 @@ h1 em { font-style: normal; color: var(--magenta); }
 .blk-final { background: var(--ink); color: var(--paper); justify-content: center; }
 .blk-final .bt { font-weight: 400; font-size: 12px; }
 
+/* ---------- Zoom cérémonie ---------- */
+.gh-micro, .ch-micro, .cell.cm { opacity: var(--z); overflow: hidden; white-space: nowrap; pointer-events: none; }
+.gh.gh-micro { border-left: 0; padding-inline: 0; }
+.ch-micro { display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; padding: 8px 8px 7px;
+            border-bottom: 1px solid var(--ink); background: var(--ink-tint); }
+.blk.cer { cursor: zoom-in; }
+.blk.cer:hover { box-shadow: 0 0 0 2px var(--ink); }
+.blk.cer:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.zchip { align-self: flex-start; margin-top: auto; display: inline-flex; align-items: center; gap: 6px;
+         font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+         border: 1px solid currentColor; border-radius: 99px; padding: 3px 10px 2px; }
+.zchip::before { content: ""; width: 9px; height: 9px; border: 1.5px solid currentColor; border-radius: 50%;
+                 box-shadow: 3px 3px 0 -1.5px currentColor; flex: none; margin-top: -2px; }
+
+.cz { display: grid; grid-template-columns: subgrid; position: relative; z-index: 5; background: var(--paper);
+      opacity: var(--z); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+      visibility: hidden; transition: visibility 0s .5s; }
+.grid.zoomed .cz { visibility: visible; transition: visibility 0s; }
+.ztick { grid-column: 1 / -1; align-self: start; height: 0; border-top: 1px solid var(--rule); z-index: 0; pointer-events: none; }
+.ztick5 { border-top-color: var(--rule-strong); }
+.zt { grid-column: 1; position: sticky; left: 0; z-index: 4; background: var(--paper); align-self: stretch;
+      font-variant-numeric: tabular-nums; font-size: 11.5px; font-weight: 600; color: var(--ink); padding: 2px 8px 0 0; }
+.zlead-t { position: sticky; left: 0; z-index: 4; background: var(--paper); align-self: end; padding: 0 8px 7px 0;
+           font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.zname { align-self: end; padding: 0 8px 7px; font-family: var(--display); font-weight: 600; font-size: 15px; line-height: 1.05;
+         border-bottom: 1px solid var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.zname-temoins, .zname-presta, .zname-enfants { color: var(--ink); }
+.zblk { z-index: 2; }
+.zmicro, .zinst { position: sticky; left: var(--tcol); z-index: 3; }
+.zinst { align-self: end; margin-bottom: 6px; }
+.zwhen { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--ink-soft); font-style: normal; }
+.k-fort .zwhen { color: var(--paper); }
+.zmus { font-size: 11.5px; color: var(--magenta); font-style: normal; }
+
+.zbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px;
+        background: var(--ink); color: var(--paper);
+        padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px));
+        padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+        transform: translateY(110%); visibility: hidden; transition: transform .35s ease, visibility 0s .35s; }
+html.zoomed .zbar { transform: none; visibility: visible; transition: transform .35s ease, visibility 0s; }
+html.zoomed .page { padding-bottom: 110px; }
+.zb-title { display: flex; flex-direction: column; gap: 1px; }
+.zb-k { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
+.zb-t { font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
+.zb-gauge { flex: 1 1 220px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.zb-lbl { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.zb-lbl b { font-weight: 600; }
+.zb-track { height: 6px; border-radius: 3px; background: var(--ink-soft); overflow: hidden; }
+.zb-fill { height: 100%; background: var(--magenta); }
+.zover .zb-lbl span:last-child { color: var(--magenta-tint); font-weight: 600; }
+.zb-out { font: inherit; font-weight: 500; font-size: 13px; padding: 9px 16px; border: 1px solid var(--paper); border-radius: 3px;
+          background: transparent; color: var(--paper); cursor: pointer; }
+.zb-out:hover { background: var(--paper); color: var(--ink); }
+.zb-out:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .grid, .zbar { transition: none !important; } }
+
 /* Focus sur une colonne */
-.grid.focusing .blk:not(.on), .grid.focusing .cell:not(.on) { opacity: .22; }
+.grid.focusing .blk:not(.on), .grid.focusing .cell:not(.on), .grid.focusing .zname:not(.on) { opacity: .22; }
 .grid.focusing .blk.blk-final { opacity: 1; }
 .blk, .cell { transition: opacity .15s ease; }
 @media (prefers-reduced-motion: reduce) { .blk, .cell { transition: none; } }
@@ -120,6 +185,7 @@ h1 em { font-style: normal; color: var(--magenta); }
 .foot .site { color: var(--magenta); }
 
 @media (max-width: 640px) {
+  :root { --microw: 150px; --mpx: 14px; --lead: 96px; }
   .meta { margin-left: 0; }
   .todo { grid-template-columns: 1fr; }
   .logo { width: 58px; }
@@ -166,6 +232,8 @@ h1 em { font-style: normal; color: var(--magenta); }
   .foot { font-size: 6pt; }
   .grid.focusing .blk, .grid.focusing .cell { opacity: 1 !important; }
   .ch[aria-pressed="true"] { background: none; color: var(--ink); }
+  .grid { --z: 0 !important; transition: none; }
+  .cz, .zbar, .zchip { display: none !important; }
 }
 </style>
 <!--BODY-->
@@ -191,7 +259,7 @@ h1 em { font-style: normal; color: var(--magenta); }
     </div>
   </header>
 
-  <p class="hint">Sélectionnez un nom pour ne voir que sa colonne.</p>
+  <p class="hint">Sélectionnez un nom pour ne voir que sa colonne · touchez la cérémonie pour la voir minute par minute.</p>
 
   <div class="scroller">
     <div class="grid" id="grid">
@@ -206,6 +274,7 @@ h1 em { font-style: normal; color: var(--magenta); }
     </ul>
   </section>
 
+  <!--ZBAR-->
   <footer class="foot">
     <span><!--FOOTER--></span>
     <span class="site">jeanne-ni.co</span>
@@ -216,18 +285,58 @@ h1 em { font-style: normal; color: var(--magenta); }
   var grid = document.getElementById('grid');
   if (!grid) return;
   var current = null;
-  grid.querySelectorAll('.ch').forEach(function (btn) {
+  grid.querySelectorAll('button.ch').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var col = btn.getAttribute('data-col');
       var same = current === col;
       current = same ? null : col;
-      grid.querySelectorAll('.ch').forEach(function (b) { b.setAttribute('aria-pressed', String(!same && b === btn)); });
+      grid.querySelectorAll('button.ch').forEach(function (b) { b.setAttribute('aria-pressed', String(!same && b === btn)); });
       grid.classList.toggle('focusing', !same);
-      grid.querySelectorAll('.blk, .cell').forEach(function (el) {
+      grid.querySelectorAll('.blk, .cell, .zname').forEach(function (el) {
         var cols = (el.getAttribute('data-cols') || el.getAttribute('data-col') || '').split(' ');
         el.classList.toggle('on', !same && cols.indexOf(col) !== -1);
       });
     });
   });
+
+  /* ---- Zoom sur la cérémonie ---- */
+  var root = document.documentElement, cz = document.getElementById('cz'), out = document.getElementById('zout');
+  var triggers = grid.querySelectorAll('[data-zoom]');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pushed = false;
+  function setZoom(on, instant) {
+    if (!cz || grid.classList.contains('zoomed') === on) return;
+    if (instant) { grid.style.transition = 'none'; }
+    grid.classList.toggle('zoomed', on);
+    root.classList.toggle('zoomed', on);
+    if (on) cz.removeAttribute('inert'); else cz.setAttribute('inert', '');
+    triggers.forEach(function (t) { t.setAttribute('aria-expanded', String(on)); });
+    if (instant) { void grid.offsetHeight; grid.style.transition = ''; }
+    var top = cz.getBoundingClientRect().top + window.scrollY - (on ? 12 : 140);
+    window.scrollTo({ top: Math.max(0, top), behavior: (reduce || instant) ? 'auto' : 'smooth' });
+    if (on && out) out.focus({ preventScroll: true });
+    if (!on && triggers[0]) triggers[0].focus({ preventScroll: true });
+  }
+  function open() {
+    if (location.hash !== '#ceremonie') { pushed = true; location.hash = 'ceremonie'; }
+    else setZoom(true);
+  }
+  function close() {
+    if (pushed) { pushed = false; history.back(); return; }
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    setZoom(false);
+  }
+  triggers.forEach(function (t) {
+    t.addEventListener('click', open);
+    t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  });
+  if (out) out.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && grid.classList.contains('zoomed')) close(); });
+  window.addEventListener('hashchange', function () {
+    var on = location.hash === '#ceremonie';
+    if (!on) pushed = false;
+    setZoom(on);
+  });
+  if (location.hash === '#ceremonie') setZoom(true, true);
 })();
 </script>
